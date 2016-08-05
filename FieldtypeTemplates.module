@@ -1,4 +1,4 @@
-<?php
+<?php namespace ProcessWire;
 
 /**
  * ProcessWire Templates (plural) Fieldtype
@@ -8,7 +8,7 @@
  * Field that stores reference to one or more templates.
  * Uses asmSelect to make the selection sortable/searchable.
  *
- * ProcessWire 2.x
+ * ProcessWire 3.x
  * Copyright (C) 2012 by Ryan Cramer
  * Licensed under GNU/GPL v2, see LICENSE.TXT
  *
@@ -20,8 +20,8 @@ class FieldtypeTemplates extends FieldtypeMulti {
 
     public static function getModuleInfo() {
         return array(
-            'title' => 'Templates Reference (multiple)',
-            'version' => 100,
+            'title' => 'Templates Fieldtype (multiple)',
+            'version' => 101,
             'summary' => 'Field that stores a reference to one or more templates and makes them sortable.',
             'permanent' => false,
         );
@@ -40,7 +40,7 @@ class FieldtypeTemplates extends FieldtypeMulti {
 
         foreach ($value as $k => $v) {
             // we allow integers
-            if (is_int($v) && $this->templates->get($v))
+            if (is_int($v) && wire('templates')->get($v))
                 continue;
 
             // we allow templates
@@ -76,7 +76,7 @@ class FieldtypeTemplates extends FieldtypeMulti {
             if (is_int($template))
                 $templateID = $template;
             else
-                $templateID = $this->fuel('templates')->get($template)->id;
+                $templateID = wire('templates')->get($template)->id;
             $a[] = $templateID;
         }
 
@@ -94,7 +94,7 @@ class FieldtypeTemplates extends FieldtypeMulti {
         foreach ($value as $k => $v) {
             if (!is_int($v))
                 continue;
-            $template = $this->fuel('templates')->get($v);
+            $template = wire('templates')->get($v);
             if ($template) {
                 $value[$k] = $template;
             } else {
@@ -107,7 +107,7 @@ class FieldtypeTemplates extends FieldtypeMulti {
 
     public function getInputfield(Page $page, Field $field) {
 
-        $inputfield = $this->modules->get('InputfieldAsmSelect');
+        $inputfield = wire('modules')->get('InputfieldAsmSelect');
         $inputfield->attr('name', $field->name);
 
         if (!empty($field->templateTypes)) {
@@ -117,9 +117,9 @@ class FieldtypeTemplates extends FieldtypeMulti {
                 $selector .= $templateType . '|';
             }
             $selector = rtrim($selector, '|');
-            $templates = $this->fuel('templates')->find($selector);
+            $templates = wire('templates')->find($selector);
         } else {
-            $templates = $this->fuel('templates');
+            $templates = wire('templates');
         }
 
         foreach ($templates as $template) {
@@ -150,10 +150,10 @@ class FieldtypeTemplates extends FieldtypeMulti {
         $templateTypes = array();
         $lastType = '';
 
-        $f = $this->modules->get("InputfieldCheckboxes");
+        $f = wire('modules')->get("InputfieldCheckboxes");
         $f->attr('name', 'templateTypes');
 
-        foreach ($this->templates as $template) {
+        foreach (wire('templates') as $template) {
             if ($template->id == $lastType)
                 continue;
             $f->addOption($template->id, $template->name . ($template->label ? ' (' . $template->label . ')' : ''));
